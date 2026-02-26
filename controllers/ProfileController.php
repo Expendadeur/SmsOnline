@@ -16,8 +16,14 @@ class ProfileController extends Controller {
     }
 
     public function index() {
+        $userId = $_SESSION['user_id'];
         $user = $this->userModel->findUserByUsername($_SESSION['username']);
-        $this->view('profile/index', ['user' => $user]);
+        $cooldown = $this->userModel->getUpdateCooldown($userId);
+        
+        $this->view('profile/index', [
+            'user' => $user,
+            'cooldown' => $cooldown
+        ]);
     }
 
     public function update() {
@@ -25,18 +31,21 @@ class ProfileController extends Controller {
             $userId = $_SESSION['user_id'];
             $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest');
             
-            if (!$this->userModel->canUpdateCredentials($userId)) {
-                $msg = 'Vous ne pouvez modifier vos identifiants qu\'une fois tous les 14 jours.';
+            $cooldown = $this->userModel->getUpdateCooldown($userId);
+            if (!$cooldown['can_update']) {
+                $msg = "Vous ne pouvez modifier vos identifiants qu'une fois tous les 14 jours. Veuillez patienter encore {$cooldown['days_left']} jour(s).";
                 if ($isAjax) {
                     $this->jsonResponse(['error' => $msg]);
                 } else {
                     $this->view('profile/index', [
                         'error' => $msg,
-                        'user' => $this->userModel->findUserByUsername($_SESSION['username'])
+                        'user' => $this->userModel->findUserByUsername($_SESSION['username']),
+                        'cooldown' => $cooldown
                     ]);
                 }
                 return;
             }
+
 
             $data = [];
             if (!empty($_POST['username'])) $data['username'] = $this->sanitize($_POST['username']);

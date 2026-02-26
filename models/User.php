@@ -47,18 +47,29 @@ class User extends Model {
         return false;
     }
 
-    public function canUpdateCredentials($userId) {
+    public function getUpdateCooldown($userId) {
         $this->db->query("SELECT last_credential_update FROM users WHERE id = :id");
         $this->db->bind(':id', $userId);
         $row = $this->db->single();
         
-        if (!$row['last_credential_update']) return true;
+        if (!$row || !$row['last_credential_update']) return ['can_update' => true, 'days_left' => 0];
 
         $lastUpdate = new DateTime($row['last_credential_update']);
         $now = new DateTime();
-        $diff = $now->diff($lastUpdate)->days;
+        $diff = $now->getTimestamp() - $lastUpdate->getTimestamp();
+        $secondsIn14Days = 14 * 24 * 60 * 60;
 
-        return ($diff >= 14);
+        if ($diff >= $secondsIn14Days) {
+            return ['can_update' => true, 'days_left' => 0];
+        } else {
+            $daysLeft = ceil(($secondsIn14Days - $diff) / (24 * 60 * 60));
+            return ['can_update' => false, 'days_left' => (int)$daysLeft];
+        }
+    }
+
+    public function canUpdateCredentials($userId) {
+        $res = $this->getUpdateCooldown($userId);
+        return $res['can_update'];
     }
 
     public function updateCredentials($userId, $data) {

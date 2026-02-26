@@ -71,33 +71,40 @@
 
         <div id="response-msg"></div>
 
+        <?php if (!$data['cooldown']['can_update']): ?>
         <div class="last-update-hint">
+            <strong>🔒 Cooldown :</strong> Pour des raisons de sécurité, vous pourrez modifier votre profil dans <strong><?php echo $data['cooldown']['days_left']; ?> jour(s)</strong>.
+        </div>
+        <?php else: ?>
+        <div class="last-update-hint" style="color: #666; background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.05);">
             <strong>Sécurité :</strong> Les identifiants ne peuvent être modifiés qu'une fois tous les 14 jours.
         </div>
+        <?php endif; ?>
 
         <form id="profile-form" action="<?php echo BASE_URL; ?>/Profile/update" method="POST">
+            <?php $disabled = !$data['cooldown']['can_update'] ? 'disabled' : ''; ?>
             <div class="form-group">
                 <label for="username">Nom d'utilisateur</label>
-                <input type="text" name="username" id="username" class="form-control" value="<?php echo $data['user']['username']; ?>" required>
+                <input type="text" name="username" id="username" class="form-control" value="<?php echo $data['user']['username']; ?>" required <?php echo $disabled; ?>>
             </div>
 
             <div class="form-group">
                 <label for="telephone">Numéro de Téléphone</label>
-                <input type="tel" name="telephone" id="telephone" class="form-control" value="<?php echo $data['user']['telephone']; ?>" required>
+                <input type="tel" name="telephone" id="telephone" class="form-control" value="<?php echo $data['user']['telephone']; ?>" required <?php echo $disabled; ?>>
             </div>
 
             <div class="form-group">
                 <label for="password">Nouveau Mot de passe</label>
-                <input type="password" name="password" id="password" class="form-control" placeholder="Laisser vide pour garder l'actuel">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Laisser vide pour garder l'actuel" <?php echo $disabled; ?>>
                 <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666;">
-                    <input type="checkbox" id="togglePassword" style="width: 16px; height: 16px; cursor: pointer;">
+                    <input type="checkbox" id="togglePassword" style="width: 16px; height: 16px; cursor: pointer;" <?php echo $disabled; ?>>
                     <label for="togglePassword" style="cursor: pointer; margin: 0; font-weight: normal;">Afficher le mot de passe</label>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 30px;">
                 <a href="<?php echo BASE_URL; ?>/Dashboard" class="btn-premium" style="background: #666; text-decoration: none; text-align: center; flex: 1; text-transform: none; display: flex; align-items: center; justify-content: center;">Annuler</a>
-                <button type="submit" id="submit-btn" class="btn-premium" style="flex: 2;">Mettre à jour</button>
+                <button type="submit" id="submit-btn" class="btn-premium" style="flex: 2; <?php echo $disabled ? 'opacity: 0.6; cursor: not-allowed; background: #ccc;' : ''; ?>" <?php echo $disabled; ?>>Mettre à jour</button>
             </div>
         </form>
     </div>
