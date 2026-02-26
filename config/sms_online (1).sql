@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mar. 24 fév. 2026 à 06:03
+-- Généré le : jeu. 26 fév. 2026 à 16:11
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -34,6 +34,13 @@ CREATE TABLE `comments` (
   `content` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `comments`
+--
+
+INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`) VALUES
+(1, 1, 2, 'Bien!!!!', '2026-02-26 13:10:52');
 
 -- --------------------------------------------------------
 
@@ -69,6 +76,13 @@ CREATE TABLE `likes` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Déchargement des données de la table `likes`
+--
+
+INSERT INTO `likes` (`id`, `post_id`, `user_id`, `created_at`) VALUES
+(1, 1, 2, '2026-02-26 13:14:13');
+
 -- --------------------------------------------------------
 
 --
@@ -92,7 +106,10 @@ CREATE TABLE `messages` (
 INSERT INTO `messages` (`id`, `sender_id`, `receiver_id`, `message`, `type`, `status`, `created_at`) VALUES
 (1, 2, 1, 'Bonsoir!!!', 'text', 'read', '2026-02-23 21:40:49'),
 (2, 2, 1, 'voice_699ccc8d3ed87.webm', 'audio', 'read', '2026-02-23 21:54:21'),
-(3, 1, 2, 'voice_699ccce2bfeaa.webm', 'audio', 'read', '2026-02-23 21:55:46');
+(3, 1, 2, 'voice_699ccce2bfeaa.webm', 'audio', 'read', '2026-02-23 21:55:46'),
+(4, 2, 1, 'Bonjour', 'text', 'sent', '2026-02-24 05:37:39'),
+(5, 2, 1, 'voice_69a0326277018.webm', 'audio', 'sent', '2026-02-26 11:45:38'),
+(6, 2, 1, 'voice_69a03c81232d2.webm', 'audio', 'sent', '2026-02-26 12:28:49');
 
 -- --------------------------------------------------------
 
@@ -107,6 +124,26 @@ CREATE TABLE `posts` (
   `media_path` varchar(255) DEFAULT NULL,
   `media_type` enum('text','image','video') DEFAULT 'text',
   `view_count` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `posts`
+--
+
+INSERT INTO `posts` (`id`, `user_id`, `content`, `media_path`, `media_type`, `view_count`, `created_at`) VALUES
+(1, 2, '', 'post_69a0451b24f23.jpg', 'image', 3, '2026-02-26 13:05:31');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `post_shares`
+--
+
+CREATE TABLE `post_shares` (
+  `id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -138,7 +175,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `nom`, `prenom`, `cni`, `photo`, `username`, `password`, `telephone`, `date_naissance`, `last_credential_update`, `last_seen`, `created_at`, `is_verified`) VALUES
 (1, 'NZAMBIMANA', 'Janvier', '531.0304/66.581', '699cbdd43c8f1.png', 'Janvier', '$2y$10$.bovCQcxVM.TVydIr6zOJe2OzgurbUJs7an8eY/g2aTJEGQZb.kji', '+25769951268', '2002-01-01', '2026-02-23 22:51:32', '2026-02-24 00:00:13', '2026-02-23 20:51:32', 0),
-(2, 'KABURA', 'Claude', '531.031/55.265', '699cc2dc1de23.jpg', 'Claude', '$2y$10$RU72MJdoGsFvv6CEAS9vBuBjxX/bSkjQ42p0LWwVr2ib3oI8Tpjwe', '+25762938162', '2001-01-01', '2026-02-23 23:13:00', '2026-02-24 06:50:13', '2026-02-23 21:13:00', 0);
+(2, 'KABURA', 'Claude', '531.031/55.265', '699cc2dc1de23.jpg', 'Claude', '$2y$10$RU72MJdoGsFvv6CEAS9vBuBjxX/bSkjQ42p0LWwVr2ib3oI8Tpjwe', '+25762938162', '2001-01-01', '2026-02-23 23:13:00', '2026-02-26 13:42:26', '2026-02-23 21:13:00', 0);
 
 --
 -- Index pour les tables déchargées
@@ -184,6 +221,14 @@ ALTER TABLE `posts`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Index pour la table `post_shares`
+--
+ALTER TABLE `post_shares`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_share` (`post_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Index pour la table `users`
 --
 ALTER TABLE `users`
@@ -200,7 +245,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT pour la table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `friendships`
@@ -212,18 +257,24 @@ ALTER TABLE `friendships`
 -- AUTO_INCREMENT pour la table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `posts`
 --
 ALTER TABLE `posts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT pour la table `post_shares`
+--
+ALTER TABLE `post_shares`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -269,6 +320,13 @@ ALTER TABLE `messages`
 --
 ALTER TABLE `posts`
   ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `post_shares`
+--
+ALTER TABLE `post_shares`
+  ADD CONSTRAINT `post_shares_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `post_shares_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
